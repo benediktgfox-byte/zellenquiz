@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Das Zell-Quiz</title>
+
+<style>
+:root {
+  --gruen: #42b883;
+  --dunkel: #243b53;
+  --hell: #f1f8f5;
+  --rot: #e85d75;
+  --gelb: #ffd166;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, #b7ead6, #dcecff);
+  color: var(--dunkel);
+}
+
+.quiz {
+  width: min(720px, 94vw);
+  background: white;
+  border-radius: 24px;
+  padding: 28px;
+  box-shadow: 0 10px 35px #315c7540;
+}
+
+h1, h2 {
+  text-align: center;
+  margin-top: 0;
+}
+
+.start, .ende {
+  text-align: center;
+}
+
+button {
+  border: 0;
+  border-radius: 12px;
+  padding: 13px 22px;
+  margin: 8px 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  background: var(--gruen);
+  color: white;
+  font-weight: bold;
+}
+
+button:hover {
+  filter: brightness(.94);
+}
+
+input[type="text"] {
+  padding: 12px;
+  border: 2px solid #cbd5e1;
+  border-radius: 10px;
+  font-size: 1rem;
+  width: 80%;
+  max-width: 320px;
+}
+
+.oben {
+  display: flex;
+  justify-content: space-between;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.progress {
+  height: 10px;
+  background: #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 25px;
+}
+
+.progress div {
+  height: 100%;
+  background: var(--gruen);
+  transition: width .3s;
+}
+
+.option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  color: var(--dunkel);
+  background: var(--hell);
+  border: 2px solid #d7eee4;
+  margin: 10px 0;
+}
+
+.option.selected {
+  border-color: var(--gruen);
+  background: #d9f5e9;
+}
+
+.option.correct {
+  background: #c9f7d8;
+  border-color: #27ae60;
+}
+
+.option.wrong {
+  background: #ffd9df;
+  border-color: var(--rot);
+}
+
+.feedback {
+  margin: 18px 0;
+  padding: 14px;
+  border-radius: 12px;
+  background: #fff5cc;
+  line-height: 1.45;
+}
+
+.hidden {
+  display: none;
+}
+
+.karte {
+  background: var(--hell);
+  border: 2px solid #d7eee4;
+  padding: 14px;
+  margin: 10px 0;
+  border-radius: 12px;
+}
+
+select {
+  padding: 9px;
+  border-radius: 8px;
+  margin-left: 8px;
+}
+</style>
+</head>
+
+<body>
+<main class="quiz">
+
+<section id="start" class="start">
+  <h1>🔬 Das Zell-Quiz</h1>
+  <p>Teste dein Wissen über Pflanzen- und Tierzellen.</p>
+  <p><strong>10 Fragen</strong> aus einem größeren Fragenpool</p>
+  <input id="name" type="text" placeholder="Dein Name">
+  <br>
+  <button onclick="startQuiz()">Quiz starten</button>
+</section>
+
+<section id="spiel" class="hidden">
+  <div class="oben">
+    <span id="frageNummer"></span>
+    <span>Punkte: <span id="punkte">0</span></span>
+    <span>⏱ <span id="zeit">20</span></span>
+  </div>
+
+  <div class="progress">
+    <div id="balken"></div>
+  </div>
+
+  <h2 id="frage"></h2>
+  <div id="aufgabe"></div>
+  <div id="feedback" class="feedback hidden"></div>
+  <button id="pruefen" onclick="pruefen()">Antwort prüfen</button>
+  <button id="weiter" class="hidden" onclick="weiter()">Weiter</button>
+</section>
+
+<section id="ende" class="ende hidden">
+  <h1>🎉 Fertig!</h1>
+  <p id="ergebnis"></p>
+  <p id="bewertung"></p>
+  <button onclick="location.reload()">Nochmal spielen</button>
+</section>
+
+</main>
+
+<script>
+const fragenPool = [
+  {
+    typ: "mc",
+    frage: "Welche Aufgabe hat die Zellwand?",
+    optionen: [
+      "Sie speichert Erbinformationen.",
+      "Sie gibt der Pflanzenzelle Stabilität.",
+      "Sie stellt Zucker her.",
+      "Sie erzeugt Energie."
+    ],
+    loesung: 1,
+    erklaerung: "Die feste Zellwand verleiht der Pflanzenzelle Stabilität und hält Nachbarzellen zusammen.",
+    punkte: 100
+  },
+  {
+    typ: "multi",
+    frage: "Welche Bestandteile kommen typischerweise in einer Pflanzenzelle vor?",
+    optionen: ["Zellwand", "Chloroplast", "Vakuole", "Zellmembran"],
+    loesung: [0, 1, 2, 3],
+    erklaerung: "Pflanzenzellen besitzen unter anderem Zellwand, Chloroplasten, Vakuole und Zellmembran.",
+    punkte: 150
+  },
+  {
+    typ: "tf",
+    frage: "Die Zellmembran lässt alle Stoffe ungehindert in die Zelle hinein und hinaus.",
+    loesung: false,
+    erklaerung: "Die Zellmembran kontrolliert, welche Stoffe in die Zelle hinein- oder hinausgelangen.",
+    punkte: 100
+  },
+  {
+    typ: "mc",
+    frage: "Was befindet sich in der Vakuole?",
+    optionen: ["Zellsaft", "Erbinformation", "Chlorophyll", "Zellwandfasern"],
+    loesung: 0,
+    erklaerung: "Die Vakuole enthält Zellsaft, also Wasser und darin gelöste Stoffe.",
+    punkte: 100
+  },
+  {
+    typ: "mc",
+    frage: "Welche Zellbestandteile ermöglichen die Fotosynthese?",
+    optionen: ["Mitochondrien", "Zellkerne", "Chloroplasten", "Vakuolen"],
+    loesung: 2,
+    erklaerung: "In den Chloroplasten findet die Fotosynthese statt.",
+    punkte: 100
+  },
+  {
+    typ: "tf",
+    frage: "Mitochondrien sind unter dem Lichtmikroskop leicht zu erkennen.",
+    loesung: false,
+    erklaerung: "Mitochondrien sind sehr klein und unter dem Lichtmikroskop normalerweise nicht erkennbar.",
+    punkte: 100
+  },
+  {
+    typ: "luecke",
+    frage: "Der kugelförmige __________ enthält die Erbinformationen der Zelle.",
+    loesung: "zellkern",
+    erklaerung: "Der Zellkern enthält die Erbinformationen und steuert wichtige Vorgänge der Zelle.",
+    punkte: 100
+  },
+  {
+    typ: "zuordnung",
+    frage: "Ordne die Zellbestandteile ihrer Funktion zu.",
+    paare: [
+      ["Zellkern", "enthält die Erbinformationen"],
+      ["Chloroplast", "Ort der Fotosynthese"],
+      ["Vakuole", "speichert Zellsaft"],
+      ["Zellwand", "gibt Stabilität"]
+    ],
+    erklaerung: "Diese Zuordnungen beschreiben die wichtigsten Grundfunktionen der Zellbestandteile.",
+    punkte: 200
+  },
+  {
+    typ: "mc",
+    frage: "Welche Aussage über Tier- und Pflanzenzellen ist richtig?",
+    optionen: [
+      "Nur Tierzellen besitzen eine Zellmembran.",
+      "Nur Pflanzenzellen besitzen Zellwand, Chloroplasten und eine große Vakuole.",
+      "Tierzellen besitzen Chloroplasten.",
+      "Pflanzenzellen haben keinen Zellkern."
+    ],
+    loesung: 1,
+    erklaerung: "Zellwand, Chloroplasten und die große typische Vakuole unterscheiden Pflanzenzellen von Tierzellen.",
+    punkte: 150
+  },
+  {
+    typ: "multi",
+    frage: "Welche Aussagen über Zellen sind richtig?",
+    optionen: [
+      "Zellen sind räumliche Gebilde.",
+      "Unter dem Mikroskop erscheinen sie manchmal flach.",
+      "Man sieht immer alle Zellorganellen.",
+      "Zellen können verschiedene Organellen enthalten."
+    ],
+    loesung: [0, 1, 3],
+    erklaerung: "Unter dem Mikroskop sieht man oft nur eine dünne Schicht. Deshalb erscheinen Zellen flach und nicht alle Organellen sind sichtbar.",
+    punkte: 150
+  },
+  {
+    typ: "mc",
+    frage: "Wo befinden sich die Zellorganellen?",
+    optionen: ["In der Zellwand", "Im Zellplasma", "Außerhalb der Zelle", "Nur in der Vakuole"],
+    loesung: 1,
+    erklaerung: "Die Zellorganellen liegen innerhalb der Zelle im Zellplasma.",
+    punkte: 100
+  },
+  {
+    typ: "luecke",
+    frage: "Die äußere feste Hülle einer Pflanzenzelle heißt __________.",
+    loesung: "zellwand",
+    erklaerung: "Die Zellwand ist die feste äußere Hülle der Pflanzenzelle.",
+    punkte: 100
+  },
+  {
+    typ: "tf",
+    frage: "Die Zellmembran liegt bei der Pflanzenzelle innen an der Zellwand.",
+    loesung: true,
+    erklaerung: "Die dünne Zellmembran liegt direkt innen an der festen Zellwand.",
+    punkte: 100
+  },
+  {
+    typ: "mc",
+    frage: "Welche Aufgabe haben Mitochondrien?",
+    optionen: [
+      "Sie speichern Wasser.",
+      "Sie geben der Zelle Stabilität.",
+      "Sie sind an der Energiegewinnung beteiligt.",
+      "Sie enthalten Zellsaft."
+    ],
+    loesung: 2,
+    erklaerung: "Mitochondrien sind wichtige Orte der Energiegewinnung in der Zelle.",
+    punkte: 150
+  }
+];
+
+let fragen, index, punkte, timer, aktuelleAntwort, beantwortet;
+
+function mischen(array) {
+  return [...array].sort(() => Math.random() - 0.5);
+}
+
+function startQuiz() {
+  fragen = mischen(fragenPool).slice(0, 10);
+  index = 0;
+  punkte = 0;
+  document.getElementById("start").classList.add("hidden");
+  document.getElementById("spiel").classList.remove("hidden");
+  zeigeFrage();
+}
+
+function zeigeFrage() {
+  beantwortet = false;
+  aktuelleAntwort = null;
+  clearInterval(timer);
+
+  const f = fragen[index];
+  document.getElementById("frageNummer").textContent =
+    `${index + 1} / ${fragen.length}`;
+  document.getElementById("punkte").textContent = punkte;
+  document.getElementById("balken").style.width =
+    `${index / fragen.length * 100}%`;
+  document.getElementById("frage").textContent = f.frage;
+
+  const aufgabe = document.getElementById("aufgabe");
+  aufgabe.innerHTML = "";
+
+  if (f.typ === "mc" || f.typ === "multi") {
+    f.optionen.forEach((text, i) => {
+      const b = document.createElement("button");
+      b.className = "option";
+      b.textContent = text;
+      b.dataset.index = i;
+      b.onclick = () => {
+        if (beantwortet) return;
+        if (f.typ === "mc") {
+          document.querySelectorAll(".option").forEach(x => x.classList.remove("selected"));
+        }
+        b.classList.toggle("selected");
+      };
+      aufgabe.appendChild(b);
+    });
+  }
+
+  if (f.typ === "tf") {
+    ["Richtig", "Falsch"].forEach((text, i) => {
+      const b = document.createElement("button");
+      b.className = "option";
+      b.textContent = text;
+      b.dataset.value = i === 0;
+      b.onclick = () => {
+        if (beantwortet) return;
+        document.querySelectorAll(".option").forEach(x => x.classList.remove("selected"));
+        b.classList.add("selected");
+      };
+      aufgabe.appendChild(b);
+    });
+  }
+
+  if (f.typ === "luecke") {
+    aufgabe.innerHTML = `<input id="textAntwort" type="text" placeholder="Antwort eingeben">`;
+  }
+
+  if (f.typ === "zuordnung") {
+    f.paare.forEach((paar, i) => {
+      aufgabe.innerHTML += `
+        <div class="karte">
+          <strong>${paar[0]}</strong>
+          <select id="zu${i}">
+            <option value="">Funktion auswählen</option>
+            ${mischen(f.paare.map(x => x[1]))
+              .map(x => `<option>${x}</option>`).join("")}
+          </select>
+        </div>`;
+    });
+  }
+
+  document.getElementById("feedback").classList.add("hidden");
+  document.getElementById("pruefen").classList.remove("hidden");
+  document.getElementById("weiter").classList.add("hidden");
+
+  let rest = 20;
+  document.getElementById("zeit").textContent = rest;
+  timer = setInterval(() => {
+    rest--;
+    document.getElementById("zeit").textContent = rest;
+    if (rest <= 0) pruefen();
+  }, 1000);
+}
+
+function pruefen() {
+  if (beantwortet) return;
+  beantwortet = true;
+  clearInterval(timer);
+
+  const f = fragen[index];
+  let richtig = false;
+
+  if (f.typ === "mc") {
+    const auswahl = document.querySelector(".option.selected");
+    richtig = auswahl && Number(auswahl.dataset.index) === f.loesung;
+  }
+
+  if (f.typ === "multi") {
+    const auswahl = [...document.querySelectorAll(".option.selected")]
+      .map(x => Number(x.dataset.index)).sort();
+    richtig = JSON.stringify(auswahl) === JSON.stringify([...f.loesung].sort());
+  }
+
+  if (f.typ === "tf") {
+    const auswahl = document.querySelector(".option.selected");
+    richtig = auswahl && String(f.loesung) === auswahl.dataset.value;
+  }
+
+  if (f.typ === "luecke") {
+    const antwort = document.getElementById("textAntwort").value
+      .trim().toLowerCase();
+    richtig = antwort === f.loesung;
+  }
+
+  if (f.typ === "zuordnung") {
+    richtig = f.paare.every((paar, i) =>
+      document.getElementById("zu" + i).value === paar[1]);
+  }
+
+  if (richtig) punkte += f.punkte;
+
+  document.getElementById("punkte").textContent = punkte;
+  document.getElementById("feedback").innerHTML =
+    `<strong>${richtig ? "✓ Richtig!" : "✗ Noch nicht richtig."}</strong><br>
+     ${f.erklaerung}<br>
+     ${richtig ? `+${f.punkte} Punkte` : "0 Punkte"}`;
+  document.getElementById("feedback").classList.remove("hidden");
+  document.getElementById("pruefen").classList.add("hidden");
+  document.getElementById("weiter").classList.remove("hidden");
+}
+
+function weiter() {
+  index++;
+  if (index < fragen.length) {
+    zeigeFrage();
+  } else {
+    zeigeErgebnis();
+  }
+}
+
+function zeigeErgebnis() {
+  clearInterval(timer);
+  document.getElementById("spiel").classList.add("hidden");
+  document.getElementById("ende").classList.remove("hidden");
+
+  const max = fragen.reduce((summe, f) => summe + f.punkte, 0);
+  const prozent = Math.round(punkte / max * 100);
+
+  let text = "Weiter üben lohnt sich!";
+  if (prozent >= 90) text = "Sehr gut – du beherrschst das Thema sicher.";
+  else if (prozent >= 75) text = "Gut gemacht – die Grundlagen sitzen.";
+  else if (prozent >= 50) text = "Solide Leistung – einige Bereiche kannst du noch wiederholen.";
+
+  document.getElementById("ergebnis").innerHTML =
+    `<strong>${document.getElementById("name").value || "Dein Ergebnis"}</strong><br>
+     Du hast <strong>${punkte} von ${max} Punkten</strong> erreicht.<br>
+     Das entspricht <strong>${prozent} %</strong>.`;
+
+  document.getElementById("bewertung").textContent = text;
+}
+</script>
+</body>
+</html>
