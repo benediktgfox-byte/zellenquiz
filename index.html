@@ -151,7 +151,6 @@ select {
 <section id="start" class="start">
   <h1>🔬 Das Zell-Quiz</h1>
   <p>Teste dein Wissen über Pflanzen- und Tierzellen.</p>
-  <p><strong>10 Fragen</strong> aus einem größeren Fragenpool</p>
   <input id="name" type="text" placeholder="Dein Name">
   <br>
   <button onclick="startQuiz()">Quiz starten</button>
@@ -316,6 +315,141 @@ const fragenPool = [
     loesung: 2,
     erklaerung: "Mitochondrien sind wichtige Orte der Energiegewinnung in der Zelle.",
     punkte: 150
+  }
+
+{
+    typ: "mc",
+    frage: "Welche Struktur liegt direkt innerhalb der Zellwand?",
+    optionen: [
+      "Die Zellmembran",
+      "Der Zellkern",
+      "Die Vakuole",
+      "Das Mitochondrium"
+    ],
+    loesung: 0,
+    erklaerung: "Die dünne Zellmembran liegt direkt innen an der festen Zellwand.",
+    punkte: 100
+  },
+
+  {
+    typ: "multi",
+    frage: "Welche Bestandteile besitzen sowohl Tier- als auch Pflanzenzellen?",
+    optionen: [
+      "Zellkern",
+      "Zellmembran",
+      "Zellwand",
+      "Mitochondrien"
+    ],
+    loesung: [0, 1, 3],
+    erklaerung: "Beide Zelltypen besitzen unter anderem Zellkern, Zellmembran und Mitochondrien. Eine Zellwand besitzen typische Pflanzenzellen, aber keine Tierzellen.",
+    punkte: 150
+  },
+
+  {
+    typ: "mc",
+    frage: "Warum erscheint eine Zelle unter dem Mikroskop manchmal flach?",
+    optionen: [
+      "Weil Zellen grundsätzlich flach sind.",
+      "Weil meist nur eine sehr dünne Schicht betrachtet wird.",
+      "Weil die Zellwand die Zelle zusammendrückt.",
+      "Weil die Vakuole Wasser verliert."
+    ],
+    loesung: 1,
+    erklaerung: "Zellen sind räumliche Gebilde. Unter dem Mikroskop wird jedoch meist nur eine dünne Schicht sichtbar.",
+    punkte: 150
+  },
+
+  {
+    typ: "tf",
+    frage: "Chloroplasten kommen besonders in grünen Teilen von Pflanzen vor.",
+    loesung: true,
+    erklaerung: "Chloroplasten befinden sich vor allem in grünen Pflanzenteilen, zum Beispiel in Blättern.",
+    punkte: 100
+  },
+
+  {
+    typ: "luecke",
+    frage: "Das Innere der Zelle, in dem sich die Zellorganellen befinden, heißt __________.",
+    loesung: "zellplasma",
+    erklaerung: "Im Zellplasma liegen unter anderem Zellkern, Chloroplasten und Mitochondrien.",
+    punkte: 100
+  },
+
+  {
+    typ: "mc",
+    frage: "Welche Aussage zur Vakuole ist richtig?",
+    optionen: [
+      "Sie enthält die Erbinformation.",
+      "Sie ist ein Speicher für Wasser und gelöste Stoffe.",
+      "Sie ist für die Fotosynthese zuständig.",
+      "Sie bildet die äußere feste Hülle."
+    ],
+    loesung: 1,
+    erklaerung: "Die große Vakuole speichert Zellsaft, also Wasser und darin gelöste Stoffe.",
+    punkte: 100
+  },
+
+  {
+    typ: "multi",
+    frage: "Welche Aufgaben hat die Zellmembran?",
+    optionen: [
+      "Sie grenzt die Zelle nach außen ab.",
+      "Sie kontrolliert den Stoffaustausch.",
+      "Sie verleiht der Zelle als feste Faserhülle Stabilität.",
+      "Sie lässt bestimmte Stoffe hinein oder hinaus."
+    ],
+    loesung: [0, 1, 3],
+    erklaerung: "Die Zellmembran grenzt die Zelle ab und kontrolliert, welche Stoffe die Zelle passieren dürfen.",
+    punkte: 150
+  },
+
+  {
+    typ: "mc",
+    frage: "Welcher Zellbestandteil ist kugelförmig und enthält die Erbinformation?",
+    optionen: [
+      "Die Vakuole",
+      "Der Zellkern",
+      "Der Chloroplast",
+      "Das Zellplasma"
+    ],
+    loesung: 1,
+    erklaerung: "Der Zellkern ist meist kugelförmig und enthält die Erbinformationen der Zelle.",
+    punkte: 100
+  },
+
+  {
+    typ: "tf",
+    frage: "Die Zellwand und die Zellmembran haben genau dieselbe Funktion.",
+    loesung: false,
+    erklaerung: "Die Zellwand gibt vor allem Stabilität. Die Zellmembran kontrolliert dagegen den Stoffaustausch.",
+    punkte: 150
+  },
+
+  {
+    typ: "mc",
+    frage: "Welcher Zellbestandteil ist mit einem Kraftwerk vergleichbar?",
+    optionen: [
+      "Die Zellwand",
+      "Die Vakuole",
+      "Das Mitochondrium",
+      "Der Zellkern"
+    ],
+    loesung: 2,
+    erklaerung: "Mitochondrien sind an der Energiegewinnung beteiligt und können deshalb mit Kraftwerken verglichen werden.",
+    punkte: 100
+  },
+
+  {
+    typ: "zuordnung",
+    frage: "Ordne die Zellbestandteile passenden Vergleichen zu.",
+    paare: [
+      ["Zellmembran", "Pförtner"],
+      ["Zellwand", "Stadtmauer"],
+      ["Mitochondrium", "Kraftwerk"],
+      ["Chloroplast", "Solaranlage"]
+    ],
+    erklaerung: "Die Vergleiche helfen, die Funktionen der Zellbestandteile zu verstehen.",
+    punkte: 200
   }
 ];
 
